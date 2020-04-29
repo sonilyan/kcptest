@@ -16,7 +16,6 @@ public class kcptest : MonoBehaviour,IKcpCallback
     private IPEndPoint iep;
     
     IPEndPoint remote = null;
-    
 
     private void Awake()
     {
@@ -33,21 +32,22 @@ public class kcptest : MonoBehaviour,IKcpCallback
         
         iep = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 62001);
 
-        tsk = Task.Factory.StartNew(() =>
-        {
-            while (true)
-            {
-                _kcp.Input(_udpClient.Receive(ref remote));
-                //Debug.Log($"{remote.Address}|{remote.Port}");
-            }
-        });
-
         StartCoroutine(test_send());
         StartCoroutine(test_recv());
+
+        StartRecv();
+    }
+    
+    async void StartRecv()
+    {
+        while (true)
+        {
+            var tmp = await _udpClient.ReceiveAsync();
+            _kcp.Input(tmp.Buffer);
+            //Debug.Log($"{tmp.RemoteEndPoint.Address}|{tmp.RemoteEndPoint.Port}");
+        }
     }
 
-    private Task tsk;
-    
     public void Output(IMemoryOwner<byte> buffer, int avalidLength)
     {
         _udpClient.Send(buffer.Memory.ToArray(), avalidLength, iep);
@@ -89,7 +89,5 @@ public class kcptest : MonoBehaviour,IKcpCallback
     private void OnDestroy()
     {
         _kcp.Dispose();
-        _udpClient.Close();
-        tsk.Dispose();
     }
 }
