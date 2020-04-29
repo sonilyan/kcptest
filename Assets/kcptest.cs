@@ -25,6 +25,7 @@ public class kcptest : MonoBehaviour,IKcpCallback
         _kcp.NoDelay(1, 10, 2, 1);//fast
         _kcp.WndSize(64, 64);
         _kcp.SetMtu(512);
+        //https://github.com/xtaci/kcptun/issues/185
         
         _udpClient = new UdpClient(62001);
         
